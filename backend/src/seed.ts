@@ -3,7 +3,8 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { Application, Document, Profile, Store, emit, generateApprovals, scoreRisk, startReady, validateDocument } from './core.js';
 
-export const dataFile=resolve(process.cwd(),'data/store.json');
+export const storageRoot=process.env.VERCEL?'/tmp':process.cwd();
+export const dataFile=resolve(storageRoot,'data/store.json');
 export const demoUsers=[
   {id:'USR-ENT-1',name:'Aarav Kulkarni',email:'entrepreneur@demo.udyogsetu.in',role:'ENTREPRENEUR' as const},
   {id:'USR-OFF-1',name:'Meera Patil',email:'officer@demo.udyogsetu.in',role:'OFFICER' as const},
@@ -45,7 +46,7 @@ export function makeSeed():Store{
 }
 if(process.argv[1]?.replaceAll('\\','/').endsWith('/src/seed.ts')){
   const store=makeSeed();mkdirSync(dirname(dataFile),{recursive:true});writeFileSync(dataFile,JSON.stringify(store,null,2));
-  const dir=resolve(process.cwd(),'uploads');mkdirSync(dir,{recursive:true});
+  const dir=resolve(storageRoot,'uploads');mkdirSync(dir,{recursive:true});
   for(const app of store.applications)for(const doc of app.documents)writeFileSync(resolve(dir,doc.id),sampleText(doc.type,app.profile,app.id==='US-MH-2026-00124'&&doc.type==='Factory Layout Plan'));
   console.log(`Seeded ${dataFile}`);
 }
